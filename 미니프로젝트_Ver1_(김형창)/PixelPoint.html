@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" type="text/css" href="css/style1-1.css" />
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>화소 점 처리</title>
+
+    <script type="text/javascript" src="js/js2.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript"
+        src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Water-Ripple-Animation-ripples/js/jquery.ripples.js"></script>
+    <script>
+        $(document).ready(function () {
+            var fileTarget = $('#file');
+            fileTarget.on('change', function () { // 값이 변경되면
+                var cur = $(".filebox input[type='file']").val();
+                $(".upload-name").val(cur);
+            });
+        });
+
+        $("#file").on('change', function () {
+            var fileName = $("#file").val();
+            $(".upload-name").val(fileName);
+        });
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            try {
+                $('.a,.b,.c').ripples({
+                    resolution: 256,
+                    perturbance: 0.04
+                });
+            }
+            catch (e) {
+                $('.error').show().text(e);
+            }
+        });
+    </script>
+
+    <script>
+        // 전역 변수(*중요*)
+        var inCanvas, inCtx, outCanvas, outCtx; // 입력 캔버스 관련
+        var inFile, inImageArray, outImageArray; // 입력 파일 및 배열
+        var inWidth, inHeight, outWidth, outHeight; // 입력 영상의 폭과 높이
+        var inPaper, outPaper; // 캔버스에는 한점한점이 안찍힘. 대신 캔버스에 종이를 붙임.
+        var histoArray;
+        var inCanvas2, inCtx2, outCanvas2, outCtx2;
+        var inPaper2, outPaper2;
+        var inCanvas3, inCtx3, outCanvas3, outCtx3;
+        var inHistoArray, outHistoArray;
+        var inPaper3, outPaper3;
+        function init() {
+            inCanvas = document.getElementById("inCanvas");
+            inCtx = inCanvas.getContext("2d");
+            outCanvas = document.getElementById("outCanvas");
+            outCtx = outCanvas.getContext("2d");
+            inCanvas2 = document.getElementById('inCanvas2');
+            inCtx2 = inCanvas2.getContext('2d');
+            outCanvas2 = document.getElementById('outCanvas2');
+            outCtx2 = outCanvas2.getContext('2d');
+            inCanvas3 = document.getElementById('inCanvas3');
+            inCtx3 = inCanvas3.getContext('2d');
+            outCanvas3 = document.getElementById('outCanvas3');
+            outCtx3 = outCanvas3.getContext('2d');
+        }
+
+        function readRawImage() {
+            inFile = document.getElementById("selectFile").files[0];
+            // 중요! 코드 (영상의 크기를 파악)
+            inWidth = inHeight = Math.sqrt(inFile.size);
+            // 입력 2차원 배열을 준비
+            inImageArray = new Array(inHeight); // 256짜리 1차원 배열
+            for (var i = 0; i < inHeight; i++) inImageArray[i] = new Array(inWidth);
+            // 캔버스 크기를 결정
+            inCanvas.width = inWidth;
+            inCanvas.height = inHeight;
+            // RAW 파일  --> 2차원 배열
+            var reader = new FileReader();
+            reader.readAsBinaryString(inFile);
+            reader.onload = function () {
+                var bin = reader.result; // 파일을 덩어리(bin)로 읽었음
+                // 덩어리(bin)에서 한점한점씩 뽑아서, 배열에 넣기
+                for (var i = 0; i < inHeight; i++) {
+                    for (var k = 0; k < inWidth; k++) {
+                        // 0,0  0,1  0,2 ...... 0,255
+                        // 1,0  1,1, 1,2 .......1,255
+                        // ....
+                        // 255,0  255,1 ....... 255,255
+                        var sPixel = i * inHeight + k;
+                        var ePixel = i * inHeight + k + 1;
+                        inImageArray[i][k] = bin.slice(sPixel, ePixel); // 1개픽셀-->배열
+                    }
+                }
+                // 화면에 출력하기 (사람용)
+                inPaper = inCtx.createImageData(inHeight, inWidth); //종이 붙였음.
+                for (var i = 0; i < inHeight; i++) {
+                    for (var k = 0; k < inWidth; k++) {
+                        var charValue = inImageArray[i][k].charCodeAt(0); // 깨진문자를 숫자로.
+                        inPaper.data[(i * inWidth + k) * 4 + 0] = charValue; // R
+                        inPaper.data[(i * inWidth + k) * 4 + 1] = charValue; // G
+                        inPaper.data[(i * inWidth + k) * 4 + 2] = charValue; // B
+                        inPaper.data[(i * inWidth + k) * 4 + 3] = 255; // Alpha
+                    }
+                }
+                inCtx.putImageData(inPaper, 0, 0);
+                // 출력 2차원 배열을 준비
+                inHistoArray = new Array(20);
+                for (var i = 0; i < 20; i++)
+                    inHistoArray[i] = new Array(256);
+
+                histoMake(inImageArray);
+                printInImage2();
+            }
+        }
+        function printInImage() {
+            inPaper = inCtx.createImageData(inHeight, inWidth);
+            for (var i = 0; i < inHeight; i++) {
+                for (var k = 0; k < inWidth; k++) {
+                    var charValue = inImageArray[i][k].charCodeAt(0);
+                    inPaper.data[(i * inWidth + k) * 4 + 0] = charValue;
+                    inPaper.data[(i * inWidth + k) * 4 + 1] = charValue;
+                    inPaper.data[(i * inWidth + k) * 4 + 2] = charValue;
+                    inPaper.data[(i * inWidth + k) * 4 + 3] = 255;
+                }
+            }
+            inCtx.putImageData(inPaper, 0, 0);
+        }
+
+        function printOutImage() {
+            outCanvas.width = outWidth;
+            outCanvas.height = outHeight;
+            outPaper = outCtx.createImageData(outHeight, outWidth); //종이 붙였음.
+            for (var i = 0; i < outHeight; i++) {
+                for (var k = 0; k < outWidth; k++) {
+                    var charValue = outImageArray[i][k].charCodeAt(0); // 깨진문자를 숫자로.
+                    outPaper.data[(i * outWidth + k) * 4 + 0] = charValue; // R
+                    outPaper.data[(i * outWidth + k) * 4 + 1] = charValue; // G
+                    outPaper.data[(i * outWidth + k) * 4 + 2] = charValue; // B
+                    outPaper.data[(i * outWidth + k) * 4 + 3] = 255; // Alpha
+                }
+            }
+            outCtx.putImageData(outPaper, 0, 0);
+        }
+
+        function printInImage2() {
+            // 캔버스 크기를 결정
+            inCanvas2.width = 256;
+            inCanvas2.height = 256;
+            inPaper2 = inCtx2.createImageData(256, 256); //종이 붙였음.
+            for (var i = 0; i < 256; i++) {
+                for (var k = 0; k < 256; k++) {
+                    var charValue = histoArray[i][k].charCodeAt(0); // 깨진문자를 숫자로.
+                    inPaper2.data[(i * 256 + k) * 4 + 0] = charValue; // R
+                    inPaper2.data[(i * 256 + k) * 4 + 1] = charValue; // G
+                    inPaper2.data[(i * 256 + k) * 4 + 2] = charValue; // B
+                    inPaper2.data[(i * 256 + k) * 4 + 3] = 255; // Alpha
+                }
+            }
+            inCtx2.putImageData(inPaper2, 0, 0);
+            printHisto1();
+        }
+
+        function printOutImage2() {
+            // 캔버스 크기를 결정
+            outCanvas2.width = 256;
+            outCanvas2.height = 256;
+            outPaper2 = outCtx2.createImageData(256, 256); //종이 붙였음.
+            for (var i = 0; i < 256; i++) {
+                for (var k = 0; k < 256; k++) {
+                    var charValue = histoArray[i][k].charCodeAt(0); // 깨진문자를 숫자로.
+                    outPaper2.data[(i * 256 + k) * 4 + 0] = charValue; // R
+                    outPaper2.data[(i * 256 + k) * 4 + 1] = charValue; // G
+                    outPaper2.data[(i * 256 + k) * 4 + 2] = charValue; // B
+                    outPaper2.data[(i * 256 + k) * 4 + 3] = 255; // Alpha
+                }
+            }
+            outCtx2.putImageData(outPaper2, 0, 0);
+            printHisto2();
+        }
+
+        function histoMake(array1) {
+            // 히스토그램 생성
+            var histo = new Array(256);
+            for (var i = 0; i < 256; i++)
+                histo[i] = 0;
+            for (var i = 0; i < 256; i++) {
+                for (var k = 0; k < 256; k++) {
+                    // 문자 --> 숫자
+                    value = array1[i][k].charCodeAt(0);
+                    // **** 요기가 핵심 알고리즘.
+                    histo[value]++;
+                }
+            }
+            // 히스토그램 정규화
+            var max = 0;
+            var min = 256 * 256;
+            for (var i = 0; i < 256; i++) {
+                if (histo[i] < min)
+                    min = histo[i];
+                if (histo[i] > max)
+                    max = histo[i];
+            }
+            var dif = max - min
+            var normalHisto = new Array(256);
+            for (var i = 0; i < 256; i++)
+                normalHisto[i] = (histo[i] - min) * 255 / dif;
+            // 출력 2차원 배열을 준비
+            histoArray = new Array(256);
+            for (var i = 0; i < 256; i++)
+                histoArray[i] = new Array(256);
+            // 배열 초기화
+            for (var i = 0; i < 256; i++) {
+                for (var k = 0; k < 256; k++) {
+                    histoArray[i][k] = 255;
+                }
+            }
+            // 히스토그램 출력 배역 생성
+            for (var i = 0; i < 256; i++) {
+                for (var k = 0; k < normalHisto[i]; k++) {
+                    histoArray[255 - k][i] = 0;
+                }
+            }
+            for (var i = 0; i < 256; i++) {
+                for (var k = 0; k < 256; k++) {
+                    // 숫자 --> 문자
+                    histoArray[i][k] = String.fromCharCode(histoArray[i][k]);
+                }
+            }
+        }
+
+        function printHisto1() {
+            // 캔버스 크기를 결정
+            inCanvas3.width = 256;
+            inCanvas3.height = 20;
+            inPaper3 = inCtx3.createImageData(256, 20); //종이 붙였음.
+            for (var i = 0; i < 20; i++) {
+                for (var k = 0; k < 256; k++) {
+                    inHistoArray[i][k] = k;
+                    var charValue = inHistoArray[i][k];//.charCodeAt(0); // 깨진문자를 숫자로.
+                    inPaper3.data[(i * 256 + k) * 4 + 0] = charValue; // R
+                    inPaper3.data[(i * 256 + k) * 4 + 1] = charValue; // G
+                    inPaper3.data[(i * 256 + k) * 4 + 2] = charValue; // B
+                    inPaper3.data[(i * 256 + k) * 4 + 3] = 255; // Alpha
+                }
+            }
+            inCtx3.putImageData(inPaper3, 0, 0);
+        }
+
+        function printHisto2() {
+            // 캔버스 크기를 결정
+            outCanvas3.width = 256;
+            outCanvas3.height = 20;
+            outPaper3 = outCtx3.createImageData(256, 20); //종이 붙였음.
+            for (var i = 0; i < 20; i++) {
+                for (var k = 0; k < 256; k++) {
+                    inHistoArray[i][k] = k;
+                    var charValue = inHistoArray[i][k];//.charCodeAt(0); // 깨진문자를 숫자로.
+                    outPaper3.data[(i * 256 + k) * 4 + 0] = charValue; // R
+                    outPaper3.data[(i * 256 + k) * 4 + 1] = charValue; // G
+                    outPaper3.data[(i * 256 + k) * 4 + 2] = charValue; // B
+                    outPaper3.data[(i * 256 + k) * 4 + 3] = 255; // Alpha
+                }
+            }
+            outCtx3.putImageData(outPaper3, 0, 0);
+        }
+
+        function lightImage(bt) {
+            outHeight = inHeight;
+            outWidth = inWidth;
+            // 출력 2차원 배열을 준비
+            outImageArray = new Array(outHeight);
+            for (var i = 0; i < outHeight; i++)
+                outImageArray[i] = new Array(outWidth);
+
+            var value = parseInt(document.getElementById("light").value);
+            // 영상처리 알고리즘
+            for (var i = 0; i < inHeight; i++) {
+                for (var k = 0; k < inWidth; k++) {
+                    // 문자 --> 숫자
+                    pixel = inImageArray[i][k].charCodeAt(0);
+                    // ** 요기가 핵심 알고리즘. (밝게하기)
+                    if (pixel + value > 255)
+                        pixel = 255;
+                    else if (pixel + value < 0)
+                        pixel = 0;
+                    else
+                        pixel += value;
+                    // 숫자 --> 문자
+                    if (bt == 1)
+                        outImageArray[i][k] = inImageArray[i][k] = String.fromCharCode(pixel);
+                    else
+                        outImageArray[i][k] = String.fromCharCode(pixel);
+                }
+            }
+            if (bt == 1) {
+                printInImage();
+                printOutImage();
+            }
+            else {
+                printOutImage();
+                histoMake(outImageArray);
+                printOutImage2();
+            }
+        }
+
+        function conImage(bt) {
+            outHeight = inHeight;
+            outWidth = inWidth;
+            // 출력 2차원 배열을 준비
+            outImageArray = new Array(outHeight);
+            for (var i = 0; i < outHeight; i++)
+                outImageArray[i] = new Array(outWidth);
+
+            var value = parseInt(document.getElementById("con").value);
+            if (value > 0) {
+                value = (value + 10) / 10;
+                //영상처리 알고리즘
+                for (var i = 0; i < inHeight; i++) {
+                    for (var k = 0; k < inWidth; k++) {
+                        // 문자 --> 숫자
+                        pixel = inImageArray[i][k].charCodeAt(0);
+                        // ** 요기가 핵심 알고리즘.
+                        if (pixel > 127) {
+                            if (pixel * value > 255)
+                                pixel = 255;
+                            pixel *= value;
+                        }
+                        else
+                            pixel /= value;
+
+                        // 숫자 --> 문자
+                        if (bt == 1)
+                            outImageArray[i][k] = inImageArray[i][k] = String.fromCharCode(pixel);
+                        else
+                            outImageArray[i][k] = String.fromCharCode(pixel);
+                    }
+                }
+            }
+            else {
+                value = -(value - 10) / 10;
+                //영상처리 알고리즘
+                for (var i = 0; i < inHeight; i++) {
+                    for (var k = 0; k < inWidth; k++) {
+                        // 문자 --> 숫자
+                        pixel = inImageArray[i][k].charCodeAt(0);
+                        // ** 요기가 핵심 알고리즘.
+                        if (pixel > 127) {
+                            if (pixel / value < 127)
+                                pixel = 127;
+                            pixel /= value;
+                        }
+                        else {
+                            if (pixel * value > 127)
+                                pixel = 127;
+                            pixel *= value;
+                        }
+                        // 숫자 --> 문자
+                        if (bt == 1)
+                            outImageArray[i][k] = inImageArray[i][k] = String.fromCharCode(pixel);
+                        else
+                            outImageArray[i][k] = String.fromCharCode(pixel);
+                    }
+                }
+            }
+            if (bt == 1) {
+                printInImage();
+                printOutImage();
+            }
+            else {
+                printOutImage();
+                histoMake(outImageArray);
+                printOutImage2();
+            }
+        }
+
+        function gammaImage(bt) {
+            outHeight = inHeight;
+            outWidth = inWidth;
+            // 출력 2차원 배열을 준비
+            outImageArray = new Array(outHeight);
+            for (var i = 0; i < outHeight; i++)
+                outImageArray[i] = new Array(outWidth);
+
+            var value = parseInt(document.getElementById("gamma").value);
+            if (value < 0)
+                value = 1 / (1 - value);
+            else
+                value += 1;
+            // 영상처리 알고리즘
+            for (var i = 0; i < inHeight; i++) {
+                for (var k = 0; k < inWidth; k++) {
+                    // 문자 --> 숫자
+                    pixel = inImageArray[i][k].charCodeAt(0);
+                    pixel = Math.trunc(((pixel / 255) ** (1 / value)) * 255);
+
+                    // 숫자 --> 문자
+                    if (bt == 1)
+                        outImageArray[i][k] = inImageArray[i][k] = String.fromCharCode(pixel);
+                    else
+                        outImageArray[i][k] = String.fromCharCode(pixel);
+                }
+            }
+            if (bt == 1) {
+                printInImage();
+                printOutImage();
+            }
+            else {
+                printOutImage();
+                histoMake(outImageArray);
+                printOutImage2();
+            }
+        }
+
+        function bwImage() {
+            outHeight = inHeight;
+            outWidth = inWidth;
+            // 출력 2차원 배열을 준비
+            outImageArray = new Array(outHeight); // 256짜리 1차원 배열
+            for (var i = 0; i < outHeight; i++)
+                outImageArray[i] = new Array(outWidth);
+
+            // ***** 진짜 영상처리 알고리즘 *****
+            for (var i = 0; i < inHeight; i++) {
+                for (var k = 0; k < inWidth; k++) {
+                    // 문자 --> 숫자
+                    pixel = inImageArray[i][k].charCodeAt(0);
+
+                    if (pixel > 127.5)
+                        pixel = 255;
+                    else
+                        pixel = 0;
+                    // 숫자 --> 문자
+                    outImageArray[i][k] = String.fromCharCode(pixel);
+                }
+            }
+            printOutImage();
+            histoMake(outImageArray);
+            printOutImage2();
+        }
+
+        function bwAvgImage() {
+            outHeight = inHeight;
+            outWidth = inWidth;
+            // 출력 2차원 배열을 준비
+            outImageArray = new Array(outHeight); // 256짜리 1차원 배열
+            for (var i = 0; i < outHeight; i++)
+                outImageArray[i] = new Array(outWidth);
+
+            // ***** 진짜 영상처리 알고리즘 *****
+            var hap = 0;
+            for (var i = 0; i < inHeight; i++)
+                for (var k = 0; k < inWidth; k++)
+                    hap += inImageArray[i][k].charCodeAt(0);
+            var value = hap / (inHeight * inWidth);
+
+            for (var i = 0; i < inHeight; i++) {
+                for (var k = 0; k < inWidth; k++) {
+                    // 문자 --> 숫자
+                    pixel = inImageArray[i][k].charCodeAt(0);
+
+                    if (pixel > value)
+                        pixel = 255;
+                    else
+                        pixel = 0;
+                    // 숫자 --> 문자
+                    outImageArray[i][k] = String.fromCharCode(pixel);
+                }
+            }
+            printOutImage();
+            histoMake(outImageArray);
+            printOutImage2();
+        }
+
+        function bjImage() {
+            outHeight = inHeight;
+            outWidth = inWidth;
+            outImageArray = new Array(outHeight);
+            for (var i = 0; i < outHeight; i++)
+                outImageArray[i] = new Array(outWidth);
+
+            for (var i = 0; i < inHeight; i++) {
+                for (var k = 0; k < inWidth; k++) {
+                    // 문자 --> 숫자
+                    pixel = inImageArray[i][k].charCodeAt(0);
+
+                    pixel = 255 - pixel;
+
+                    inImageArray[i][k] = String.fromCharCode(pixel);
+                }
+            }
+            for (var i = 0; i < inHeight; i++) {
+                for (var k = 0; k < inWidth; k++) {
+                    outImageArray[i][k] = inImageArray[i][k];
+                }
+            }
+            printOutImage();
+            histoMake(outImageArray);
+            printOutImage2();
+        }
+
+        function histo() {
+            outHeight = inHeight;
+            outWidth = inWidth;
+            // 출력 2차원 배열을 준비
+            outImageArray = new Array(outHeight); // 256짜리 1차원 배열
+            for (var i = 0; i < outHeight; i++)
+                outImageArray[i] = new Array(outWidth);
+
+            // ***** 진짜 영상처리 알고리즘 *****
+            //  out =  ( in - low ) / ( high - low ) * 255
+            var low = inImageArray[0][0].charCodeAt(0);
+            var high = inImageArray[0][0].charCodeAt(0);
+            for (var i = 0; i < inHeight; i++) {
+                for (var k = 0; k < inWidth; k++) {
+                    pixel = inImageArray[i][k].charCodeAt(0);
+                    if (pixel < low)
+                        low = pixel;
+                    if (pixel > high)
+                        high = pixel
+                }
+            }
+            for (var i = 0; i < inHeight; i++) {
+                for (var k = 0; k < inWidth; k++) {
+                    // 문자 --> 숫자
+                    inVal = inImageArray[i][k].charCodeAt(0);
+                    // **** 요기가 핵심 알고리즘. (흑백)
+                    outVal = (inVal - low) / (high - low) * 255;
+                    // 숫자 --> 문자
+                    outImageArray[i][k] = String.fromCharCode(outVal);
+                }
+            }
+            printOutImage();
+            histoMake(outImageArray);
+            printOutImage2();
+        }
+
+        function endIn() {
+            // (중요!) 출력 영상의 크기를 결정... 알고리즘에 따름.
+            outHeight = inHeight;
+            outWidth = inWidth;
+            // 출력 2차원 배열을 준비
+            outImageArray = new Array(outHeight); // 256짜리 1차원 배열
+            for (var i = 0; i < outHeight; i++)
+                outImageArray[i] = new Array(outWidth);
+
+            // ***** 진짜 영상처리 알고리즘 *****
+            //  out =  ( in - low ) / ( high - low ) * 255
+            var low = inImageArray[0][0].charCodeAt(0);
+            var high = inImageArray[0][0].charCodeAt(0);
+            for (var i = 0; i < inHeight; i++) {
+                for (var k = 0; k < inWidth; k++) {
+                    pixel = inImageArray[i][k].charCodeAt(0);
+                    if (pixel < low)
+                        low = pixel;
+                    if (pixel > high)
+                        high = pixel
+                }
+            }
+            low += 50;
+            high -= 50;
+
+            for (var i = 0; i < inHeight; i++) {
+                for (var k = 0; k < inWidth; k++) {
+                    // 문자 --> 숫자
+                    inVal = inImageArray[i][k].charCodeAt(0);
+                    // **** 요기가 핵심 알고리즘. (흑백)
+                    outVal = (inVal - low) / (high - low) * 255;
+                    if (outVal > 255)
+                        outVal = 255;
+                    else if (outVal < 0)
+                        outVal = 0;
+
+                    // 숫자 --> 문자
+                    outImageArray[i][k] = String.fromCharCode(outVal);
+                }
+            }
+            printOutImage();
+            histoMake(outImageArray);
+            printOutImage2();
+        }
+
+        function normalHisto() {
+            outHeight = inHeight;
+            outWidth = inWidth;
+            // 출력 2차원 배열을 준비
+            outImageArray = new Array(outHeight); // 256짜리 1차원 배열
+            for (var i = 0; i < outHeight; i++)
+                outImageArray[i] = new Array(outWidth);
+
+            // ***** 진짜 영상처리 알고리즘 *****
+            // 1단계 : 히스토그램 생성
+            histo = new Array(256);
+            for (var i = 0; i < 256; i++)
+                histo[i] = 0;
+            for (var i = 0; i < inHeight; i++)
+                for (var k = 0; k < inWidth; k++) {
+                    value = inImageArray[i][k].charCodeAt(0);
+                    histo[value]++;
+                }
+            // 2단계 : 누적 히스토그램 생성
+            sumHisto = new Array(256);
+            for (var i = 0; i < 256; i++)
+                sumHisto[i] = 0;
+            sumVal = 0;
+            for (var i = 0; i < 256; i++) {
+                sumVal += histo[i];
+                sumHisto[i] = sumVal;
+            }
+            // 3단계 : 정규화된 누적히스토그램
+            // ns = s * (1/픽셀총수) * 화소최대밝기
+            normalHisto = new Array(256);
+            for (var i = 0; i < 256; i++)
+                normalHisto[i] = 0.0;
+            for (var i = 0; i < 256; i++)
+                normalHisto[i] = sumHisto[i] * (1 / (inWidth * inHeight)) * 255;
+
+            for (var i = 0; i < inHeight; i++) {
+                for (var k = 0; k < inWidth; k++) {
+                    // 문자 --> 숫자
+                    inVal = inImageArray[i][k].charCodeAt(0);
+                    // **** 요기가 핵심 알고리즘. (흑백)
+                    outVal = normalHisto[inVal];
+                    if (outVal > 255)
+                        outVal = 255;
+                    else if (outVal < 0)
+                        outVal = 0;
+                    else
+                        outVal = parseInt(outVal);
+                    // 숫자 --> 문자
+                    outImageArray[i][k] = String.fromCharCode(outVal);
+                }
+            }
+            printOutImage();
+            histoMake(outImageArray);
+            printOutImage2();
+        }
+
+    </script>
+</head>
+
+<body onload="init()">
+    <div class="a" style="background-image:url(./KakaoTalk_20200828_193153300.jpg)"></div>
+    <div class="nav">
+        <div class="company-name"><a href="FirstScreen.html" style="color: white;">nostalgia</a></div>
+        <div class="nav-right-items">
+            <button class="nav-item">메뉴1</button>
+            <button class="nav-item">메뉴2</button>
+            <button class="nav-item">메뉴3</button>
+            <button class="nav-item">메뉴4</button>
+        </div>
+    </div>
+    <div class="title">Photoshop</div>
+    <div class="sub-title1">Image processor</div>
+    <div class="sub-title2">Pixel point processing</div>
+    <div class="main">
+        <div class="mid2">
+            <div class="mid">
+                <div class="canvas">
+                    <canvas id="inCanvas" style="background-color: rgb(180, 180, 180)" width="256"
+                        height="256"></canvas>
+                    <canvas id="outCanvas" style="background-color: rgb(180, 180, 180)" width="256"
+                        height="256"></canvas><br>
+                    <canvas id='inCanvas2' style='background-color:rgb(180, 180, 180)' width="256"
+                        height="256"></canvas>
+                    <canvas id='outCanvas2' style='background-color:rgb(180, 180, 180)' width="256"
+                        height="256"></canvas><br>
+                    <canvas id='inCanvas3' style='background-color:rgb(180, 180, 180)' width="256" height="30"></canvas>
+                    <canvas id='outCanvas3' style='background-color:rgb(180, 180, 180)' width="256"
+                        height="30"></canvas>
+                </div>
+                <div class="MENU">
+                    <div class="File">
+                        <div class="filebox">
+                            <label for="selectFile">UPLOAD</label>
+                            <input type="file" id="selectFile" onchange="readRawImage()" />
+                            <input class="upload-name" value="File select...">
+                        </div>
+                    </div>
+                    <form>
+                        <div class="HW">
+                            <label> 화소 점 처리 </label>
+
+                            <div class="wrap">
+                                <input class="rangebar" type="range" id="light" min="-208" max="200" value=0>
+                                <button class="button" type='button' id='photoAdd' onclick='lightImage(0)'>밝기
+                                    조절</button>
+                            </div>
+
+                            <div class="wrap">
+                                <input type="range" id="con" min="-10" max="10" value=0>
+                                <button class="button" type='button' id='photoAdd' onclick='conImage(0)'>명암
+                                    대비</button>
+                            </div>
+
+                            <div class="wrap">
+                                <input type="range" id="gamma" min="-10" max="10" value=0>
+                                <button class="button" type='button' id='photoAdd' onclick='gammaImage(0)'>감마
+                                    보정</button>
+                            </div>
+
+                            <div class="wrap">
+                                <button class="button" type='button' id='photoAdd' onclick='bwImage()'>흑백처리</button>
+                            </div>
+
+                            <div class="wrap">
+                                <button class="button" type='button' id='photoAdd'
+                                    onclick='bwAvgImage()'>흑백처리(평균)</button>
+                            </div>
+
+                            <div class="wrap">
+                                <button class="button" type='button' id='photoAdd' onclick='bjImage()'>색반전</button>
+                            </div>
+                        </div>
+                        <div class="HW">
+                            <label> 히스토그램 사용 </label><br>
+                            <div class="wrap">
+                                <button class="button" type='button' id='photoAdd' onclick='histo()'>히스토그램
+                                    스트래칭</button>
+                            </div>
+
+                            <div class="wrap">
+                                <button class="button" type='button' id='photoAdd' onclick='endIn()'>엔드-인
+                                    탐색</button>
+                            </div>
+
+                            <div class="wrap">
+                                <button class="button" type='button' id='photoAdd' onclick='normalHisto()'>평활화</button>
+                            </div>
+                        </div>
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

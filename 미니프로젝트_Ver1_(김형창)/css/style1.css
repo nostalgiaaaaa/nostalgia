@@ -1,0 +1,185 @@
+html {
+    background-image: url(./KakaoTalk_20200828_193153300.jpg);
+    background-size: cover;
+}
+
+
+
+html,
+body {
+    height: 100%;
+    text-align: center;
+}
+
+.wrap {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.button {
+    width: 150px;
+    height: 30px;
+    font-family: 'Roboto', sans-serif;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 2.5px;
+    font-weight: 500;
+    color: #000;
+    background-color: #fff;
+    border: none;
+    border-radius: 45px;
+    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease 0s;
+    cursor: pointer;
+    outline: none;
+    margin: 5px;
+}
+
+.button:hover {
+    background-color: #2EE59D;
+    box-shadow: 0px 15px 20px rgba(46, 229, 157, 0.4);
+    color: #fff;
+    transform: translateY(-7px);
+}
+
+.nav {
+    width: 100%;
+    height: 80px;
+    border-bottom: 2px solid white;
+    display: flex;
+    align-items: center;
+    line-height: 80px;
+}
+
+.company-name {
+    margin-left: 20px;
+    font-size: 2.7rem;
+    font-weight: bold;
+    font-style: oblique;
+    color: white;
+}
+
+.nav-right-items {
+    display: flex;
+    margin-left: auto;
+    padding-right: 15px;
+}
+
+.nav-item {
+    width: 55px;
+    margin-left: 5px;
+    border: 2px solid white;
+    color: rgb(255, 255, 255);
+    background-color: rgba(255, 255, 255, 0.0);
+}
+
+.first-title {
+    font-size: 2rem;
+    font-weight: bold;
+    color: white;
+    margin-top: 230px;
+    margin-bottom: 10px;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: bold;
+    color: white;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.sub-title {
+    font-size: 1rem;
+    font-weight: bold;
+    color: white;
+}
+
+.main {
+    margin: 0;
+    display: flex;
+}
+
+.mid {
+    display: flex;
+    margin: 20px auto;
+    color: black;
+    text-align: center;
+    border: 4px solid black;
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.4);
+}
+
+.mid2{
+margin: auto;
+}
+
+.canvas {
+    border-radius: 10px;
+    border: 4px solid black;
+    padding: 20px;
+    margin: 20px;
+    background-color: rgba(255, 255, 255, 0.6);
+}
+
+.MENU {
+    border-radius: 10px;
+    border: 4px solid black;
+    margin: auto;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin-right: 20px;
+    background-color: rgba(255, 255, 255, 0.6);
+}
+
+.File {
+    background-color: rgb(175, 175, 175);
+    height: 30px;
+    line-height: 30px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.HW {
+    background: #799F0C;
+    /* fallback for old browsers */
+    background: -webkit-linear-gradient(to right, #ACBB78, #799F0C);
+    /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(to right, #ACBB78, #799F0C);
+    /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+    margin: auto;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+    width: 200px;
+    border: 4px solid black;
+    border-radius: 10px;
+    line-height: 30px;
+    padding: 5px;
+}
+
+label {
+    font-size: 1rem;
+    font-weight: bold;
+    color: white;
+}
+
+.footer{
+    margin: auto;
+    padding: 10px;
+}
+
+.bot {
+    color: white;
+    width: 720px;
+    height: 85px;
+    border-radius: 10px;
+    border: 2px solid rgb(255, 255, 255);
+    margin: 0 auto;
+    margin-top: 250px;
+    text-align: left;
+    background-color: rgba(255, 255, 255, 0.0);
+}

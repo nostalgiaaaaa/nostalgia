@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" type="text/css" href="css/Rosedemo.css" />
+    <link rel="stylesheet" type="text/css" href="css/component.css" />
+    <link rel="stylesheet" type="text/css" href="css/PostMalone.css" />
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ROSÉ</title>
+
+    <script>
+        document.documentElement.className = 'js';
+    </script>
+    <script>
+        var flag = 1;
+        function doLoad() {
+            this.video = document.getElementById('video');
+            this.c1 = document.getElementById('c1');
+            this.ctx1 = this.c1.getContext('2d');
+            this.c2 = document.getElementById('c2');
+            this.ctx2 = this.c2.getContext('2d');
+            this.c3 = document.getElementById('c3');
+            this.ctx3 = this.c3.getContext('2d');
+            this.c4 = document.getElementById('c4');
+            this.ctx4 = this.c4.getContext('2d');
+            this.c5 = document.getElementById('c5');
+            this.ctx5 = this.c5.getContext('2d');
+            this.c6 = document.getElementById('c6');
+            this.ctx6 = this.c6.getContext('2d');
+            this.c7 = document.getElementById('c7');
+            this.ctx7 = this.c7.getContext('2d');
+            this.c8 = document.getElementById('c8');
+            this.ctx8 = this.c8.getContext('2d');
+
+            let self = this;
+            this.video.addEventListener('play', function () {
+                self.width = self.video.videoWidth / 2;
+                self.height = self.video.videoHeight / 2;
+                self.timerCallback();
+            }, false);
+        }
+
+        function timerCallback() {
+            if (this.video.paused || this.video.ended) {
+                return;
+            }
+            if (flag == 1) {
+                setTimeout(function () {
+                    flag++;
+                    this.computeimageData();
+                    let self = this;
+                    setTimeout(function () {
+                        self.timerCallback();
+                    }, 0);
+                }, 1800);
+            }
+            else {
+                this.computeimageData();
+                let self = this;
+                setTimeout(function () {
+                    self.timerCallback();
+                }, 0);
+            }
+        }
+
+        function computeimageData() {
+            this.ctx1.drawImage(this.video, 0, 0, this.width, this.height);
+            let imageData = this.ctx1.getImageData(0, 0, this.width, this.height);
+
+            inWidth = this.width;
+            inHeight = this.height;
+            inVideoArray = new Array(3); // 3장짜리 배열 (R, G, B)
+            for (var i = 0; i < 3; i++) {
+                inVideoArray[i] = new Array(inHeight);
+                for (var k = 0; k < inHeight; k++)
+                    inVideoArray[i][k] = new Array(inWidth);
+            }
+
+            // 출력된 캔버스에서 픽셀값 뽑기
+            var R, G, B, Alpha;
+            for (var i = 0; i < inHeight; i++) {
+                for (var k = 0; k < inWidth; k++) {
+                    px = (i * inWidth + k) * 4; // 1픽셀 = 4byte
+                    R = imageData.data[px + 0];
+                    G = imageData.data[px + 1];
+                    B = imageData.data[px + 2];
+                    // Alpha = imageData.data[px + 3];
+                    inVideoArray[0][i][k] = String.fromCharCode(R);
+                    inVideoArray[1][i][k] = String.fromCharCode(G);
+                    inVideoArray[2][i][k] = String.fromCharCode(B);
+                }
+            }
+
+            grayscale();
+            gamma();
+            reverseImage();
+            mirLr();
+            mirTb();
+            bwImage()
+            boundaryLineColor();
+            return;
+        }
+
+        function grayscale() {
+            outHeight = inHeight;
+            outWidth = inWidth;
+            outImageArray = new Array(3); // 512짜리 1차원 배열
+            for (var i = 0; i < 3; i++) {
+                outImageArray[i] = new Array(outHeight); // 512짜리 1차원 배열
+                for (var k = 0; k < outHeight; k++)
+                    outImageArray[i][k] = new Array(outWidth);
+            }
+
+            // ***** 진짜 영상처리 알고리즘 *****
+            var R, G, B;
+            for (var i = 0; i < inHeight; i++) {
+                for (var k = 0; k < inWidth; k++) {
+                    R = inVideoArray[0][i][k].charCodeAt(0);
+                    G = inVideoArray[1][i][k].charCodeAt(0);
+                    B = inVideoArray[2][i][k].charCodeAt(0);
+
+                    var RGB = parseInt((R + G + B) / 3);
+
+                    outImageArray[0][i][inWidth - 1 - k] = String.fromCharCode(RGB);
+                    outImageArray[1][i][inWidth - 1 - k] = String.fromCharCode(RGB);
+                    outImageArray[2][i][inWidth - 1 - k] = String.fromCharCode(RGB);
+
+                }
+            }
+            var R, G, B;
+            outPaper = ctx2.createImageData(outWidth, outHeight);
+            for (var i = 0; i < outHeight; i++) {
+                for (var k = 0; k < outWidth; k++) {
+                    R = outImageArray[0][i][k].charCodeAt(0); // Byte 문자를 숫자로.
+                    G = outImageArray[1][i][k].charCodeAt(0); // Byte 문자를 숫자로.
+                    B = outImageArray[2][i][k].charCodeAt(0); // Byte 문자를 숫자로.
+                    outPaper.data[(i * outWidth + k) * 4 + 0] = R;
+                    outPaper.data[(i * outWidth + k) * 4 + 1] = G;
+                    outPaper.data[(i * outWidth + k) * 4 + 2] = B;
+                    outPaper.data[(i * outWidth + k) * 4 + 3] = 255;
+                }
+            }
+            ctx2.putImageData(outPaper, 0, 0);
+
+            //// 화소 영역 처리
+            var maskW = [[-1., -1., -1.],
+            [0., 0., 0.],
+            [1., 1., 1.]]
+
+            var maskH = [[1., 0., -1.],
+            [1., 0., -1.],
+            [1., 0., -1.]]
+            // 임시 입력 배열
+            for (var rgb = 0; rgb < 3; rgb++) {
+                tempInputArrayW = new Array(inHeight + 2); // 2칸 큼
+                for (var i = 0; i < inHeight + 2; i++)
+                    tempInputArrayW[i] = new Array(inWidth + 2);
+                // 임시 입력 배열 초기화
+                for (var i = 0; i < inHeight + 2; i++)
+                    for (var k = 0; k < inWidth + 2; k++)
+                        tempInputArrayW[i][k] = String.fromCharCode(127);
+                // 입력 배열 --> 임시 입력
+                for (var i = 0; i < inHeight; i++)
+                    for (var k = 0; k < inWidth; k++) {
+                        tempInputArrayW[i + 1][k + 1] = outImageArray[rgb][i][k];
+                    }
+                // 임시 출력 배열
+                tempOutputArrayW = new Array(outHeight);
+                for (var i = 0; i < outHeight; i++)
+                    tempOutputArrayW[i] = new Array(outWidth);
+
+                // ***** 진짜 영상처리 알고리즘 *****
+                for (var i = 0; i < inHeight; i++) {
+                    for (var k = 0; k < inWidth; k++) {
+                        var S = 0.0;
+                        for (var m = 0; m < 3; m++) {
+                            for (var n = 0; n < 3; n++) {
+                                S += maskW[m][n] * tempInputArrayW[i + m][k + n].charCodeAt(0);
+                            }
+                        }
+                        tempOutputArrayW[i][k] = S;
+                    }
+                }
+
+                tempInputArrayH = new Array(inHeight + 2); // 2칸 큼
+                for (var i = 0; i < inHeight + 2; i++)
+                    tempInputArrayH[i] = new Array(inWidth + 2);
+                // 임시 입력 배열 초기화
+                for (var i = 0; i < inHeight + 2; i++)
+                    for (var k = 0; k < inWidth + 2; k++)
+                        tempInputArrayH[i][k] = String.fromCharCode(127);
+                // 입력 배열 --> 임시 입력
+                for (var i = 0; i < inHeight; i++)
+                    for (var k = 0; k < inWidth; k++) {
+                        tempInputArrayH[i + 1][k + 1] = outImageArray[rgb][i][k];
+                    }
+                // 임시 출력 배열
+                tempOutputArrayH = new Array(outHeight); //
+                for (var i = 0; i < outHeight; i++)
+                    tempOutputArrayH[i] = new Array(outWidth);
+
+                // ***** 진짜 영상처리 알고리즘 *****
+                for (var i = 0; i < inHeight; i++) {
+                    for (var k = 0; k < inWidth; k++) {
+                        var S = 0.0;
+                        for (var m = 0; m < 3; m++) {
+                            for (var n = 0; n < 3; n++) {
+                                S += maskH[m][n] * tempInputArrayH[i + m][k + n].charCodeAt(0);
+                            }
+                        }
+                        tempOutputArrayH[i][k] = S;
+                    }
+                }
+
+                tempOutputArray = new Array(outHeight); //
+                for (var i = 0; i < outHeight; i++)
+                    tempOutputArray[i] = new Array(outWidth);
+
+                for (var i = 0; i < outHeight; i++)
+                    for (var k = 0; k < outWidth; k++)
+                        tempOutputArray[i][k] = Math.sqrt(Math.pow(tempOutputArrayW[i][k], 2) + Math.pow(tempOutputArrayH[i][k], 2));
+
+                for (var i = 0; i < outHeight; i++)
+                    for (var k = 0; k < outWidth; k++) {
+                        var v = tempOutputArray[i][k];
+                        if (v > 255.0)
+                            v = 255.0;
+                        if (v < 0)
+                            v = 0.0;
+                        outImageArray[rgb][i][k] = String.fromCharCode(v);
+                    }
+            }
+
+
+            var R, G, B;
+            outPaper = ctx8.createImageData(outWidth, outHeight);
+            for (var i = 0; i < outHeight; i++) {
+                for (var k = 0; k < outWidth; k++) {
+                    R = outImageArray[0][i][k].charCodeAt(0); // Byte 문자를 숫자로.
+                    G = outImageArray[1][i][k].charCodeAt(0); // Byte 문자를 숫자로.
+                    B = outImageArray[2][i][k].charCodeAt(0); // Byte 문자를 숫자로.
+                    outPaper.data[(i * outWidth + k) * 4 + 0] = R;
+                    outPaper.data[(i * outWidth + k) * 4 + 1] = G;
+                    outPaper.data[(i * outWidth + k) * 4 + 2] = B;
+                    outPaper.data[(i * outWidth + k) * 4 + 3] = 255;
+                }
+            }
+            ctx8.putImageData(outPaper, 0, 0);
+        }
+
+        function gamma() {
+            // (중요!) 출력 영상의 크기를 결정... 알고리즘에 따름.
+            outHeight = inHeight;
+            outWidth = inWidth;
+            // 출력 3차원 배열을 준비
+            outImageArray = new Array(3); // 512짜리 1차원 배열
+            for (var i = 0; i < 3; i++) {
+                outImageArray[i] = new Array(outHeight); // 512짜리 1차원 배열
+                for (var k = 0; k < outHeight; k++)
+                    outImageArray[i][k] = new Array(outWidth);
+            }
+
+            // ***** 진짜 영상처리 알고리즘 *****
+            for (var rgb = 0; rgb < 3; rgb++) {
+                for (var i = 0; i < inHeight; i++) {
+                    for (var k = 0; k < inWidth; k++) {
+                        // 문자 --> 숫자
+                        pixel = inVideoArray[rgb][i][k].charCodeAt(0);
+                        // ** 요기가 핵심 알고리즘.
+                        //pixel = Math.pow(pixel, 1/value);
+                        pixel = Math.trunc(((pixel / 255) ** (1 / 6)) * 255);
+                        outImageArray[rgb][i][inWidth - 1 - k] = String.fromCharCode(pixel);
+                    }
+                }
+            }
+            var R, G, B;
+            outPaper = ctx3.createImageData(outWidth, outHeight);
+            for (var i = 0; i < outHeight; i++) {
+                for (var k = 0; k < outWidth; k++) {
+                    R = outImageArray[0][i][k].charCodeAt(0); // Byte 문자를 숫자로.
+                    G = outImageArray[1][i][k].charCodeAt(0); // Byte 문자를 숫자로.
+                    B = outImageArray[2][i][k].charCodeAt(0); // Byte 문자를 숫자로.
+                    outPaper.data[(i * outWidth + k) * 4 + 0] = R;
+                    outPaper.data[(i * outWidth + k) * 4 + 1] = G;
+                    outPaper.data[(i * outWidth + k) * 4 + 2] = B;
+                    outPaper.data[(i * outWidth + k) * 4 + 3] = 255;
+                }
+            }
+            ctx3.putImageData(outPaper, 0, 0);
+        }
+
+        function reverseImage() {
+            outHeight = inHeight;
+            outWidth = inWidth;
+            // 출력 3차원 배열을 준비
+            outImageArray = new Array(3); // 512짜리 1차원 배열
+            for (var i = 0; i < 3; i++) {
+                outImageArray[i] = new Array(outHeight); // 512짜리 1차원 배열
+                for (var k = 0; k < outHeight; k++)
+                    outImageArray[i][k] = new Array(outWidth);
+            }
+
+            // ***** 진짜 영상처리 알고리즘 *****
+            for (var rgb = 0; rgb < 3; rgb++) {
+                for (var i = 0; i < inHeight; i++) {
+                    for (var k = 0; k < inWidth; k++) {
+                        pixel = inVideoArray[rgb][i][k].charCodeAt(0);
+                        pixel = 255 - pixel;
+                        outImageArray[rgb][i][k] = String.fromCharCode(pixel);
+                    }
+                }
+            }
+
+            var R, G, B;
+            outPaper = ctx4.createImageData(outWidth, outHeight);
+            for (var i = 0; i < outHeight; i++) {
+                for (var k = 0; k < outWidth; k++) {
+                    R = outImageArray[0][i][k].charCodeAt(0); // Byte 문자를 숫자로.
+                    G = outImageArray[1][i][k].charCodeAt(0); // Byte 문자를 숫자로.
+                    B = outImageArray[2][i][k].charCodeAt(0); // Byte 문자를 숫자로.
+                    outPaper.data[(i * outWidth + k) * 4 + 0] = R;
+                    outPaper.data[(i * outWidth + k) * 4 + 1] = G;
+                    outPaper.data[(i * outWidth + k) * 4 + 2] = B;
+                    outPaper.data[(i * outWidth + k) * 4 + 3] = 255;
+                }
+            }
+            ctx4.putImageData(outPaper, 0, 0);
+        }
+
+        function mirLr() {
+            outHeight = inHeight;
+            outWidth = inWidth;
+            outImageArray = new Array(3); // 512짜리 1차원 배열
+            for (var i = 0; i < 3; i++) {
+                outImageArray[i] = new Array(outHeight); // 512짜리 1차원 배열
+                for (var k = 0; k < outHeight; k++)
+                    outImageArray[i][k] = new Array(outWidth);
+            }
+
+            for (var i = 0; i < inHeight; i++) {
+                for (var k = 0; k < inWidth; k++) {
+                    R = inVideoArray[0][i][k].charCodeAt(0);
+                    G = inVideoArray[1][i][k].charCodeAt(0);
+                    B = inVideoArray[2][i][k].charCodeAt(0);
+                    var hsv = rgb2hsv(R, G, B);
+                    var H = hsv.h;
+                    var S = hsv.s;
+                    var V = hsv.v;
+
+                    R += 2;
+                    S += 2;
+                    B += 2;
+
+                    var rgb = hsv2rgb(H, S, V);
+                    R = rgb.r;
+                    G = rgb.g;
+                    B = rgb.b;
+
+                    outImageArray[0][i][inWidth - 1 - k] = String.fromCharCode(R);
+                    outImageArray[1][i][inWidth - 1 - k] = String.fromCharCode(G);
+                    outImageArray[2][i][inWidth - 1 - k] = String.fromCharCode(B);
+                }
+            }
+
+            outPaper = ctx5.createImageData(outWidth, outHeight);
+            for (var i = 0; i < outHeight; i++) {
+                for (var k = 0; k < outWidth; k++) {
+                    R = outImageArray[0][i][k].charCodeAt(0); // Byte 문자를 숫자로.
+                    G = outImageArray[1][i][k].charCodeAt(0); // Byte 문자를 숫자로.
+                    B = outImageArray[2][i][k].charCodeAt(0); // Byte 문자를 숫자로.
+                    outPaper.data[(i * outWidth + k) * 4 + 0] = R;
+                    outPaper.data[(i * outWidth + k) * 4 + 1] = G;
+                    outPaper.data[(i * outWidth + k) * 4 + 2] = B;
+                    outPaper.data[(i * outWidth + k) * 4 + 3] = 255;
+                }
+            }
+            ctx5.putImageData(outPaper, 0, 0);
+
+
+            function rgb2hsv(r, g, b) {
+                var max = Math.max(r, g, b), min = Math.min(r, g, b),
+                    d = max - min,
+                    h,
+                    s = (max === 0 ? 0 : d / max),
+                    v = max / 255;
+
+                switch (max) {
+                    case min: h = 0; break;
+                    case r: h = (g - b) + d * (g < b ? 6 : 0); h /= 6 * d; break;
+                    case g: h = (b - r) + d * 2; h /= 6 * d; break;
+                    case b: h = (r - g) + d * 4; h /= 6 * d; break;
+                }
+                return {
+                    h: h, s: s, v: v
+                };
+            }
+
+            function hsv2rgb(h, s, v) {
+                var r, g, b, i, f, p, q, t;
+
+                h = h * 360; s = s * 100; v = v * 100;
+
+                // Make sure our arguments stay in-range
+                h = Math.max(0, Math.min(360, h));
+                s = Math.max(0, Math.min(100, s));
+                v = Math.max(0, Math.min(100, v));
+
+                h /= 360; s /= 100; v /= 100;
+
+                i = Math.floor(h * 6);
+                f = h * 6 - i;
+                p = v * (1 - s);
+                q = v * (1 - f * s);
+                t = v * (1 - (1 - f) * s);
+                switch (i % 6) {
+                    case 0: r = v, g = t, b = p; break;
+                    case 1: r = q, g = v, b = p; break;
+                    case 2: r = p, g = v, b = t; break;
+                    case 3: r = p, g = q, b = v; break;
+                    case 4: r = t, g = p, b = v; break;
+                    case 5: r = v, g = p, b = q; break;
+                }
+                return {
+                    r: Math.round(r * 255),
+                    g: Math.round(g * 255),
+                    b: Math.round(b * 255)
+                };
+            }
+        }
+
+        function mirTb() {
+            outHeight = inHeight;
+            outWidth = inWidth;
+            outImageArray = new Array(3); // 512짜리 1차원 배열
+            for (var i = 0; i < 3; i++) {
+                outImageArray[i] = new Array(outHeight); // 512짜리 1차원 배열
+                for (var k = 0; k < outHeight; k++)
+                    outImageArray[i][k] = new Array(outWidth);
+            }
+
+            for (var rgb = 0; rgb < 3; rgb++) {
+                for (var i = 0; i < inHeight; i++) {
+                    for (var k = 0; k < inWidth; k++) {
+                        outImageArray[rgb][i][k] = inVideoArray[rgb][inHeight - 1 - i][k];
+                    }
+                }
+            }
+
+            var R, G, B;
+            outPaper = ctx6.createImageData(outWidth, outHeight);
+            for (var i = 0; i < outHeight; i++) {
+                for (var k = 0; k < outWidth; k++) {
+                    R = outImageArray[0][i][k].charCodeAt(0); // Byte 문자를 숫자로.
+                    G = outImageArray[1][i][k].charCodeAt(0); // Byte 문자를 숫자로.
+                    B = outImageArray[2][i][k].charCodeAt(0); // Byte 문자를 숫자로.
+                    outPaper.data[(i * outWidth + k) * 4 + 0] = R;
+                    outPaper.data[(i * outWidth + k) * 4 + 1] = G;
+                    outPaper.data[(i * outWidth + k) * 4 + 2] = B;
+                    outPaper.data[(i * outWidth + k) * 4 + 3] = 255;
+                }
+            }
+            ctx6.putImageData(outPaper, 0, 0);
+        }
+
+        function bwImage() {
+            outHeight = inHeight;
+            outWidth = inWidth;
+            outImageArray = new Array(3);
+            for (var i = 0; i < 3; i++) {
+                outImageArray[i] = new Array(outHeight);
+                for (var k = 0; k < outHeight; k++)
+                    outImageArray[i][k] = new Array(outWidth);
+            }
+
+            // ***** 진짜 영상처리 알고리즘 *****
+            var R, G, B;
+            for (var i = 0; i < inHeight; i++) {
+                for (var k = 0; k < inWidth; k++) {
+                    R = inVideoArray[0][i][k].charCodeAt(0);
+                    G = inVideoArray[1][i][k].charCodeAt(0);
+                    B = inVideoArray[2][i][k].charCodeAt(0);
+                    var RGB = parseInt((R + G + B) / 3);
+                    if (RGB > 100) RGB = 255;
+                    else RGB = 0;
+                    outImageArray[0][i][k] = String.fromCharCode(RGB);
+                    outImageArray[1][i][k] = String.fromCharCode(RGB);
+                    outImageArray[2][i][k] = String.fromCharCode(RGB);
+                }
+            }
+            var R, G, B;
+            outPaper = ctx1.createImageData(outWidth, outHeight);
+            for (var i = 0; i < outHeight; i++) {
+                for (var k = 0; k < outWidth; k++) {
+                    R = outImageArray[0][i][k].charCodeAt(0); // Byte 문자를 숫자로.
+                    G = outImageArray[1][i][k].charCodeAt(0); // Byte 문자를 숫자로.
+                    B = outImageArray[2][i][k].charCodeAt(0); // Byte 문자를 숫자로.
+                    outPaper.data[(i * outWidth + k) * 4 + 0] = R;
+                    outPaper.data[(i * outWidth + k) * 4 + 1] = G;
+                    outPaper.data[(i * outWidth + k) * 4 + 2] = B;
+                    outPaper.data[(i * outWidth + k) * 4 + 3] = 255;
+                }
+            }
+            ctx1.putImageData(outPaper, 0, 0);
+        }
+
+        function boundaryLineColor() {
+            outHeight = inHeight;
+            outWidth = inWidth;
+            outImageArray = new Array(3); // 512짜리 1차원 배열
+            for (var i = 0; i < 3; i++) {
+                outImageArray[i] = new Array(outHeight); // 512짜리 1차원 배열
+                for (var k = 0; k < outHeight; k++)
+                    outImageArray[i][k] = new Array(outWidth);
+            }
+
+            //// 화소 영역 처리
+            var maskW = [[-1., -1., -1.],
+            [0., 0., 0.],
+            [1., 1., 1.]]
+
+            var maskH = [[1., 0., -1.],
+            [1., 0., -1.],
+            [1., 0., -1.]]
+            // 임시 입력 배열
+
+            for (var rgb = 0; rgb < 3; rgb++) {
+                tempInputArrayW = new Array(inHeight + 2); // 2칸 큼
+                for (var i = 0; i < inHeight + 2; i++)
+                    tempInputArrayW[i] = new Array(inWidth + 2);
+                // 임시 입력 배열 초기화
+                for (var i = 0; i < inHeight + 2; i++)
+                    for (var k = 0; k < inWidth + 2; k++)
+                        tempInputArrayW[i][k] = String.fromCharCode(127);
+                // 입력 배열 --> 임시 입력
+                for (var i = 0; i < inHeight; i++)
+                    for (var k = 0; k < inWidth; k++) {
+                        tempInputArrayW[i + 1][k + 1] = inVideoArray[rgb][i][k];
+                    }
+                // 임시 출력 배열
+                tempOutputArrayW = new Array(outHeight);
+                for (var i = 0; i < outHeight; i++)
+                    tempOutputArrayW[i] = new Array(outWidth);
+
+                // ***** 진짜 영상처리 알고리즘 *****
+                for (var i = 0; i < inHeight; i++) {
+                    for (var k = 0; k < inWidth; k++) {
+                        var S = 0.0;
+                        for (var m = 0; m < 3; m++) {
+                            for (var n = 0; n < 3; n++) {
+                                S += maskW[m][n] * tempInputArrayW[i + m][k + n].charCodeAt(0);
+                            }
+                        }
+                        tempOutputArrayW[i][k] = S;
+                    }
+                }
+
+                tempInputArrayH = new Array(inHeight + 2); // 2칸 큼
+                for (var i = 0; i < inHeight + 2; i++)
+                    tempInputArrayH[i] = new Array(inWidth + 2);
+                // 임시 입력 배열 초기화
+                for (var i = 0; i < inHeight + 2; i++)
+                    for (var k = 0; k < inWidth + 2; k++)
+                        tempInputArrayH[i][k] = String.fromCharCode(127);
+                // 입력 배열 --> 임시 입력
+                for (var i = 0; i < inHeight; i++)
+                    for (var k = 0; k < inWidth; k++) {
+                        tempInputArrayH[i + 1][k + 1] = inVideoArray[rgb][i][k];
+                    }
+                // 임시 출력 배열
+                tempOutputArrayH = new Array(outHeight); //
+                for (var i = 0; i < outHeight; i++)
+                    tempOutputArrayH[i] = new Array(outWidth);
+
+                // ***** 진짜 영상처리 알고리즘 *****
+                for (var i = 0; i < inHeight; i++) {
+                    for (var k = 0; k < inWidth; k++) {
+                        var S = 0.0;
+                        for (var m = 0; m < 3; m++) {
+                            for (var n = 0; n < 3; n++) {
+                                S += maskH[m][n] * tempInputArrayH[i + m][k + n].charCodeAt(0);
+                            }
+                        }
+                        tempOutputArrayH[i][k] = S;
+                    }
+                }
+
+                tempOutputArray = new Array(outHeight); //
+                for (var i = 0; i < outHeight; i++)
+                    tempOutputArray[i] = new Array(outWidth);
+
+                for (var i = 0; i < outHeight; i++)
+                    for (var k = 0; k < outWidth; k++)
+                        tempOutputArray[i][k] = Math.sqrt(Math.pow(tempOutputArrayW[i][k], 2) + Math.pow(tempOutputArrayH[i][k], 2));
+
+                for (var i = 0; i < outHeight; i++)
+                    for (var k = 0; k < outWidth; k++) {
+                        var v = tempOutputArray[i][k];
+                        if (v > 255.0)
+                            v = 255.0;
+                        if (v < 0)
+                            v = 0.0;
+                        outImageArray[rgb][i][k] = String.fromCharCode(v);
+                    }
+            }
+            var R, G, B;
+            outPaper = ctx7.createImageData(outWidth, outHeight);
+            for (var i = 0; i < outHeight; i++) {
+                for (var k = 0; k < outWidth; k++) {
+                    R = outImageArray[0][i][k].charCodeAt(0); // Byte 문자를 숫자로.
+                    G = outImageArray[1][i][k].charCodeAt(0); // Byte 문자를 숫자로.
+                    B = outImageArray[2][i][k].charCodeAt(0); // Byte 문자를 숫자로.
+                    outPaper.data[(i * outWidth + k) * 4 + 0] = R;
+                    outPaper.data[(i * outWidth + k) * 4 + 1] = G;
+                    outPaper.data[(i * outWidth + k) * 4 + 2] = B;
+                    outPaper.data[(i * outWidth + k) * 4 + 3] = 255;
+                }
+            }
+            ctx7.putImageData(outPaper, 0, 0);
+        }
+
+    </script>
+</head>
+
+<body class="demo-2" onload="doLoad()">
+    <header class="codrops-header">
+        <div class="nav">
+            <div class="company-name"><a href="FirstScreen.html" style="color: white;">nostalgia</a></div>
+            <div class="nav-right-items">
+                <button class="nav-item">메뉴1</button>
+                <button class="nav-item">메뉴2</button>
+                <button class="nav-item">메뉴3</button>
+                <button class="nav-item">메뉴4</button>
+            </div>
+        </div>
+    </header>
+    <div class="segmenter"
+        style="background-image: url(img/KakaoTalk_20210327_224724579.jpg) ; background-size: cover;"></div>
+    <div class="video"><video id="video" src="video/KakaoTalk_20210327_224741766.mp4" controls="true" width="480"
+            height="270"></video><br>
+    </div>
+    <h2 class="trigger-headline trigger-headline--hidden">
+        <span>R</span><span>O</span><span>S</span><span>É</span>
+    </h2>
+    <script src="js/anime.min.js"></script>
+    <script src="js/imagesloaded.pkgd.min.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        (function () {
+            var headline = document.querySelector('.trigger-headline'),
+                trigger = document.querySelector('.btn--trigger'),
+                segmenter = new Segmenter(document.querySelector('.segmenter'), {
+                    pieces: 9,
+                    positions: [
+                        { top: 30, left: 5, width: 40, height: 80 },
+                        { top: 50, left: 25, width: 30, height: 30 },
+                        { top: 5, left: 75, width: 40, height: 20 },
+                        { top: 30, left: 45, width: 40, height: 20 },
+                        { top: 45, left: 15, width: 50, height: 40 },
+                        { top: 10, left: 40, width: 10, height: 20 },
+                        { top: 20, left: 50, width: 30, height: 70 },
+                        { top: 0, left: 10, width: 50, height: 60 },
+                        { top: 70, left: 40, width: 30, height: 30 }
+                    ],
+                    animation: {
+                        duration: 2000,
+                        easing: 'easeInOutCubic',
+                        delay: 0,
+                        opacity: 1,
+                        translateZ: 85,
+                        translateX: { min: -20, max: 20 },
+                        translateY: { min: -20, max: 20 }
+                    },
+                    parallax: true,
+                    parallaxMovement: { min: 5, max: 10 },
+                    onReady: function () {
+                        video.addEventListener('play', function () {
+                            segmenter.animate();
+                            headline.classList.remove('trigger-headline--hidden');
+                        });
+                    }
+                });
+        })();
+    </script>
+
+    <div class="title">Photoshop</div>
+    <div class="sub-title1">Image processor</div>
+    <div class="sub-title2">video editing</div>
+
+
+    <div class="cx1">
+        <canvas id="c1" style="background-color: rgba(255, 255, 255, 0);" width="320" height="180"></canvas>
+    </div>
+
+    <div class="cx2">
+        <canvas id="c2" style="background-color: rgba(255, 255, 255, 0);" width="320" height="180"></canvas>
+    </div>
+
+    <div class="cx3">
+        <canvas id="c3" style="background-color: rgba(255, 255, 255, 0);" width="320" height="180"></canvas>
+    </div>
+
+    <div class="cx4">
+        <canvas id="c4" style="background-color: rgba(255, 255, 255, 0);" width="320" height="180"></canvas>
+    </div>
+
+    <div class="cx5">
+        <canvas id="c5" style="background-color: rgba(255, 255, 255, 0);" width="320" height="180"></canvas>
+    </div>
+
+    <div class="cx6">
+        <canvas id="c6" style="background-color: rgba(255, 255, 255, 0);" width="320" height="180"></canvas>
+    </div>
+
+    <div class="cx7">
+        <canvas id="c7" style="background-color: rgba(255, 255, 255, 0);" width="320" height="180"></canvas>
+    </div>
+
+    <div class="cx8">
+        <canvas id="c8" style="background-color: rgba(255, 255, 255, 0);" width="320" height="180"></canvas>
+    </div>
+
+</body>
+
+</html>

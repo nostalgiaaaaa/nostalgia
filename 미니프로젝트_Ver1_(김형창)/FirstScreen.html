@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" type="text/css" href="css/Firstscreen.css" />
+    <link rel="stylesheet" type="text/css" href="css/style2.css" />
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Photoshop</title>
+
+    <script type="text/javascript" src="js/js2.js"></script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript"
+        src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Water-Ripple-Animation-ripples/js/jquery.ripples.js"></script>
+    <script>
+        $(document).ready(function () {
+            try {
+                $('.a,.b,.c').ripples({
+                    resolution: 256,
+                    perturbance: 0.04
+                });
+            }
+            catch (e) {
+                $('.error').show().text(e);
+            }
+        });
+    </script>
+
+    <Script>
+        $(function () {
+            $('.btn-6')
+                .on('mouseenter', function (e) {
+                    var parentOffset = $(this).offset(),
+                        relX = e.pageX - parentOffset.left,
+                        relY = e.pageY - parentOffset.top;
+                    $(this).find('span').css({ top: relY, left: relX })
+                })
+                .on('mouseout', function (e) {
+                    var parentOffset = $(this).offset(),
+                        relX = e.pageX - parentOffset.left,
+                        relY = e.pageY - parentOffset.top;
+                    $(this).find('span').css({ top: relY, left: relX })
+                });
+            $('[href=#]').click(function () { return false });
+        });
+    </Script>
+</head>
+
+<body>
+    <div class="a" style="background-image:url(./KakaoTalk_20200828_193153300.jpg)">
+        <div class="nav">
+            <div class="company-name"><a href="FirstScreen.html" style="color: white;">nostalgia</a></div>
+            <div class="nav-right-items">
+                <button class="nav-item">메뉴1</button>
+                <button class="nav-item">메뉴2</button>
+                <button class="nav-item">메뉴3</button>
+                <button class="nav-item">메뉴4</button>
+            </div>
+        </div>
+        <div class="first-title">FRONT-END PROJECT</div>
+        <div class="sub-title1">HTML5 / CSS / JAVASCRIPT</div>
+        <div class="sub-title2">Web Programming - Photoshop</div>
+        <div class="sub-title3">Image processing</div>
+
+        <div class="title-menu">
+            <a class="btn-6" href="PixelPoint.html">Pixel Point<span></span></a>
+            <a class="btn-6" href="PixelArea.html">Pixel Area<span></span></a>
+            <a class="btn-6" href="geometry.html">Geometry<span></span></a>
+        </div>
+        <div class="title-menu2">
+            <a class="btn-4" href="PostMalone.html">Post Malone<span></span></a>
+            <a class="btn-2" href="christopher.html">Christopher<span></span></a>
+            <a class="btn-7" href="Rose.html">ROSÉ<span></span></a>
+
+        </div>
+
+        <div class="bot">
+            <ul>
+                <li>Phone number : (+82) 10-2054-0272</li>
+                <li>Instagram : nostalgla</li>
+            </ul>
+        </div>
+    </div>
+
+
+
+    <div class="error"></div>
+
+    <scrip src="http://www.jqueryscript.net/demo/jQuery-Plugin-For-Water-Ripple-Animation-ripples/js/jquery.ripples.js">
+    </scrip>
+</body>
+
+</html>
