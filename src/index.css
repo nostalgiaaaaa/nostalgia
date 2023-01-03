@@ -1,13 +1,393 @@
-body {
+html {
+  width: 100%;
+  height: 100%;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  padding: 0;
+  font-size: 62.5%;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+body {
+  /* background-image: url("style/Background.jpg");
+  background-size: cover; */
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+h1,
+h3 {
+  text-shadow: 0 0.3rem 0.2rem rgba(0, 0, 0, 0.5);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0 auto;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.App {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.jquery-ripples {
+  width: 100% !important;
+  height: 100% !important;
+  background-image: url("style/Background.jpg") !important;
+  background-size: cover !important;
+}
+
+.header {
+  width: 100%;
+  height: 10%;
+  text-align: center;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+}
+
+.header .headerInfo,
+.header .headerInfo h1 {
+  margin: auto;
+  font: italic 3.5rem serif;
+}
+
+.main {
+  width: 100%;
+  height: 85%;
+}
+
+.footer {
+  width: 100%;
+  height: 5%;
+  text-align: center;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+}
+
+.footer .footerInfo {
+  margin: auto;
+  margin-right: 1%;
+  text-align: right;
+}
+
+.container {
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+}
+section {
+  margin: auto;
+  display: inline-block;
+  padding: 10rem;
+  max-width: 50rem;
+  box-shadow: 0 0.7rem 1rem 0.8rem rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 1.6rem;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+section h1 {
+  margin-bottom: 1%;
+}
+
+.left-hover-box {
+  position: fixed;
+  left: 0;
+  width: 5%;
+  height: 85%;
+}
+
+.left-hover-box:hover {
+  z-index: 0;
+}
+
+.right-hover-box {
+  position: fixed;
+  right: 0;
+  width: 5%;
+  height: 85%;
+}
+
+.right-hover-box:hover {
+  z-index: 0;
+}
+
+.profile-menu {
+  width: 50rem;
+  height: 85%;
+  position: fixed;
+  left: -50rem;
+  opacity: 0;
+  border: 1px solid white;
+  transition: all 0.5s;
+}
+
+.profile-menu-active {
+  width: 50rem;
+  height: 85%;
+  position: fixed;
+  z-index: 5;
+  left: 0rem;
+  opacity: 1;
+  background-color: rgba(0, 0, 0, 0.5);
+  transition: all 0.5s;
+}
+
+.side-menu {
+  width: 70rem;
+  height: 70rem;
+  border-radius: 35rem;
+  position: fixed;
+  right: -70rem;
+  opacity: 0;
+  transition: all 0.5s;
+  transform: rotate(0deg);
+}
+
+.side-menu-active {
+  width: 70rem;
+  height: 70rem;
+  border-radius: 35rem;
+  position: fixed;
+  z-index: 3;
+  right: -35rem;
+  opacity: 1;
+  transition: all 0.5s;
+  transform: rotate(-45deg);
+}
+
+.side-menu-center {
+  left: 22rem;
+  top: 22rem;
+  transform: translate(-1%, -1%);
+  position: absolute;
+  border-radius: 100%;
+  z-index: 5;
+  width: 26rem;
+  height: 26rem;
+  background: radial-gradient(rgb(77, 77, 77), rgb(30, 30, 30), rgb(0, 0, 0));
+}
+.side-menu-center p {
+  color: #ddd;
+  font: italic 2rem serif;
+  margin-top: 4rem;
+}
+
+.each-side-menu {
+  width: 35rem;
+  height: 35rem;
+  background-color: #000;
+  box-shadow: 0 0.7rem 1rem 0.8rem rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.each-side-menu img {
+  opacity: 0.7;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+}
+
+.each-side-menu img:hover {
+  opacity: 1;
+}
+
+#side-menu {
+  width: 100%;
+  height: 100%;
+  transform: rotate(0deg);
+  transition: all 0.5s;
+}
+
+#menu0 {
+  float: left;
+  text-align: center;
+  border-top-left-radius: 100%;
+  transform: translate(-1%, -1%);
+  transition: all 0.3s;
+}
+
+#menu0:hover {
+  transform: translate(-3%, -3%);
+}
+
+#menu1 {
+  float: left;
+  text-align: center;
+  border-top-right-radius: 100%;
+  transform: translate(1%, -1%);
+  transition: all 0.3s;
+}
+#menu1:hover {
+  transform: translate(3%, -3%);
+}
+
+#menu2 {
+  float: left;
+  text-align: center;
+  border-bottom-left-radius: 100%;
+  background-size: cover;
+  transform: translate(-1%, 1%);
+  transition: all 0.3s;
+}
+#menu2:hover {
+  transform: translate(-3%, 3%);
+}
+
+#menu3 {
+  float: left;
+  text-align: center;
+  border-bottom-right-radius: 100%;
+  transform: translate(1%, 1%);
+  transition: all 0.3s;
+}
+#menu3:hover {
+  transform: translate(3%, 3%);
+}
+
+#menu0 img {
+  height: 50rem;
+  transform: translate(-8rem, 9rem) rotate(45deg);
+}
+
+#menu1 img {
+  height: 50rem;
+  transform: translate(-40rem, -4rem) rotate(135deg);
+}
+
+#menu2 img {
+  height: 50rem;
+  transform: translate(-7rem, -8rem) rotate(315deg);
+}
+
+#menu3 img {
+  height: 50rem;
+  transform: translate(-18rem, -9rem) rotate(195deg);
+}
+
+.cx1,
+.cx2,
+.cx3,
+.cx4,
+.cx5,
+.cx6,
+.cx7,
+.cx8 {
+  position: fixed;
+  width: 32rem;
+  height: 18rem;
+  box-shadow: 0 0.7rem 1rem 0.8rem rgba(0, 0, 0, 0.5);
+}
+.cx2 {
+  padding: 10px;
+  border-radius: 10px;
+  top: 10%;
+  left: 3%;
+  transition: all ease 0.5s;
+}
+.cx2:hover {
+  transform: rotate(20deg);
+}
+
+.cx6 {
+  padding: 10px;
+  border-radius: 10px;
+  top: 10%;
+  right: 3%;
+  transition: all ease 0.5s;
+}
+.cx6:hover {
+  transform: rotate(-20deg);
+}
+
+.cx8 {
+  padding: 10px;
+  border-radius: 10px;
+  bottom: 10%;
+  left: 2%;
+  transform: rotate(20deg);
+  transition: all ease 0.5s;
+}
+.cx8:hover {
+  transform: rotate(0deg);
+}
+
+.cx4 {
+  padding: 10px;
+  border-radius: 10px;
+  bottom: 10%;
+  right: 2%;
+  transform: rotate(-20deg);
+  transition: all ease 0.5s;
+}
+.cx4:hover {
+  transform: rotate(0deg);
+}
+
+.cx5 {
+  padding: 10px;
+  border-radius: 10px;
+  bottom: 5%;
+  left: 27%;
+  transition: all ease 0.5s;
+}
+.cx5:hover {
+  transform: rotate(20deg);
+}
+
+.cx1 {
+  padding: 10px;
+  border-radius: 10px;
+  bottom: 5%;
+  right: 27%;
+  transition: all ease 0.5s;
+}
+.cx1:hover {
+  transform: rotate(-20deg);
+}
+
+.cx3 {
+  padding: 10px;
+  border-radius: 10px;
+  bottom: 36%;
+  left: 13%;
+  transform: rotate(20deg);
+  transition: all ease 0.5s;
+}
+.cx3:hover {
+  transform: rotate(0deg);
+}
+
+.cx7 {
+  padding: 10px;
+  border-radius: 10px;
+  bottom: 36%;
+  right: 13%;
+  transform: rotate(-20deg);
+  transition: all ease 0.5s;
+}
+.cx7:hover {
+  transform: rotate(0deg);
 }
