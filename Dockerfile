@@ -1,16 +1,16 @@
-# FROM node:8.10.0 as builder
+#build phase
+FROM node:alpine as builder
+WORKDIR '/app'
+COPY package.json .
+RUN npm install
+COPY . .
+RUN npm run build
 
-# # 작업 폴더를 만들고 npm 설치
-# RUN mkdir /usr/src/app
-# WORKDIR /usr/src/app
-# ENV PATH /usr/src/app/node_modules/.bin:$PATH
-# COPY package.json /usr/src/app/package.json
-# RUN npm install --silent
-# RUN npm install react-scripts@2.1.3 -g --silent
-
-# # 소스를 작업폴더로 복사하고 앱 실행
-# COPY . /usr/src/app
-# CMD ["npm", "start"]
-
+# run phase
 FROM nginx
-COPY nostalgia /usr/share/nginx/html
+# build 폴더 복사 , 다른 phase 에서 가져옴
+# nginx port 
+EXPOSE 80
+# from , destination
+COPY --from=builder /app/build /usr/share/nginx/html
+#start 는 디폴트
