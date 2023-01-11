@@ -4,7 +4,9 @@ interface Props {
 }
 
 const LabelView = (props: Props) => {
-  const label = props.label.split("").map((text, idx) => <p>{text}</p>);
+  const label = props.label
+    .split("")
+    .map((text, idx) => <p key={idx}>{text}</p>);
 
   return (
     <div className="label-wrap">
