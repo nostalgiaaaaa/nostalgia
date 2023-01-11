@@ -1,15 +1,35 @@
 import * as React from "react";
+import ProfileMenu from "../components/main/menu/ProfileMenu";
+import SideMenu from "../components/main/menu/SideMenu";
 import image from "style/Background.jpg";
 import WaterWave from "react-water-wave";
 import Header from "components/header/Header";
 import Footer from "components/footer/Footer";
 
 interface Props {
+  title: string;
+  desc: string;
   image: string;
+  handleImage: any;
   height: number;
 }
 
-class NotFound extends React.Component<Props> {
+class Profile extends React.Component<Props> {
+  constructor(props: Props) {
+    super(props);
+    this.handleimage = this.handleimage.bind(this);
+  }
+
+  handleimage(image: string) {
+    this.props.handleImage(image);
+    window.sessionStorage.setItem("image", image);
+  }
+
+  componentDidMount() {
+    this.handleimage(image);
+    window.sessionStorage.setItem("image", image);
+  }
+
   render() {
     return (
       <WaterWave
@@ -24,9 +44,11 @@ class NotFound extends React.Component<Props> {
             <div className="main">
               <div className="container">
                 <section>
-                  <h1>404 Not Found X___X</h1>
-                  <h3>페이지를 찾을 수 없습니다.</h3>
+                  <h1>{this.props.title}</h1>
+                  <h3>{this.props.desc}</h3>
                 </section>
+                <ProfileMenu></ProfileMenu>
+                <SideMenu image={image} setImage={this.handleimage}></SideMenu>
               </div>
             </div>
             <Footer></Footer>
@@ -41,4 +63,4 @@ class NotFound extends React.Component<Props> {
 //   title: "Hello, world-!",
 // };
 
-export default NotFound;
+export default Profile;

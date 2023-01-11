@@ -1,24 +1,10 @@
-import * as React from "react";
-// import PropTypes from "prop-types";
-import malonImage from "style/PostMalone.jpg";
+import LabelView from "components/main/etc/Labelview";
+import { useEffect, useState } from "react";
 
-interface Props {
-  image: string;
-  handleImage: any;
-}
+const PostMalone = () => {
+  const [videoState, setVideoState] = useState(false);
 
-class PostMalone extends React.Component<Props> {
-  constructor(props: Props) {
-    super(props);
-    this.handleimage = this.handleimage.bind(this);
-  }
-
-  handleimage() {
-    this.props.handleImage(malonImage);
-  }
-
-  componentDidMount() {
-    this.handleimage();
+  useEffect(() => {
     let flag = 1;
     let width = 0;
     let height = 0;
@@ -47,9 +33,12 @@ class PostMalone extends React.Component<Props> {
     video.addEventListener(
       "play",
       () => {
+        setVideoState(true);
         width = video.videoWidth / 2;
         height = video.videoHeight / 2;
-        timerCallback();
+        setTimeout(() => {
+          timerCallback();
+        }, 1000);
       },
       false
     );
@@ -110,7 +99,6 @@ class PostMalone extends React.Component<Props> {
       mirTb();
       bwImage();
       boundaryLineColor();
-      return;
     };
 
     const grayscale = () => {
@@ -683,55 +671,53 @@ class PostMalone extends React.Component<Props> {
       }
       ctx7?.putImageData(outPaper, 0, 0);
     }
-  }
+  }, []);
+  return (
+    <>
+      <LabelView play={videoState} label={"BTS"}></LabelView>
+      <div className="video">
+        <video id="video" controls={true} width="480" height="270">
+          <source
+            src={require("style/PostMaloneVideo.mp4")}
+            type="video/mp4"
+          ></source>
+        </video>
+      </div>
 
-  render() {
-    return (
-      <>
-        <div className="video">
-          <video id="video" controls={true} width="480" height="270">
-            <source
-              src={require("style/PostMaloneVideo.mp4")}
-              type="video/mp4"
-            ></source>
-          </video>
-        </div>
+      <div className="cx1">
+        <canvas id="c1" width="320" height="180"></canvas>
+      </div>
 
-        <div className="cx1">
-          <canvas id="c1" width="320" height="180"></canvas>
-        </div>
+      <div className="cx2">
+        <canvas id="c2" width="320" height="180"></canvas>
+      </div>
 
-        <div className="cx2">
-          <canvas id="c2" width="320" height="180"></canvas>
-        </div>
+      <div className="cx3">
+        <canvas id="c3" width="320" height="180"></canvas>
+      </div>
 
-        <div className="cx3">
-          <canvas id="c3" width="320" height="180"></canvas>
-        </div>
+      <div className="cx4">
+        <canvas id="c4" width="320" height="180"></canvas>
+      </div>
 
-        <div className="cx4">
-          <canvas id="c4" width="320" height="180"></canvas>
-        </div>
+      <div className="cx5">
+        <canvas id="c5" width="320" height="180"></canvas>
+      </div>
 
-        <div className="cx5">
-          <canvas id="c5" width="320" height="180"></canvas>
-        </div>
+      <div className="cx6">
+        <canvas id="c6" width="320" height="180"></canvas>
+      </div>
 
-        <div className="cx6">
-          <canvas id="c6" width="320" height="180"></canvas>
-        </div>
+      <div className="cx7">
+        <canvas id="c7" width="320" height="180"></canvas>
+      </div>
 
-        <div className="cx7">
-          <canvas id="c7" width="320" height="180"></canvas>
-        </div>
-
-        <div className="cx8">
-          <canvas id="c8" width="320" height="180"></canvas>
-        </div>
-      </>
-    );
-  }
-}
+      <div className="cx8">
+        <canvas id="c8" width="320" height="180"></canvas>
+      </div>
+    </>
+  );
+};
 
 // PostMalone.propTypes = {
 //   imageState: PropTypes.string,

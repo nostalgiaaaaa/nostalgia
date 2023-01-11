@@ -1,9 +1,9 @@
 import React from "react";
-import WaterWave from "react-water-wave";
 import image from "style/Background.jpg";
-import Header from "components/header/Header";
-import Main from "components/main/Main";
-import Footer from "components/footer/Footer";
+import Main from "./main/Main";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import Profile from "./Profile";
+import NotFound from "./NotFound";
 
 // export interface IndexPageInterface {
 //   children: React.ReactNode;
@@ -29,35 +29,38 @@ class IndexPage extends React.Component<Props, state> {
 
   render() {
     return (
-      <WaterWave
-        imageUrl={this.state.image}
-        // imageUrl={image}
-        dropRadius={20}
-        resolution={512}
+      <div
+        className="main-background"
+        style={{
+          backgroundImage: `url(${window.sessionStorage.getItem("image")})`,
+          backgroundSize: "cover",
+        }}
       >
-        {({ hide, show }: any) => (
-          <div style={{ height: this.props.height }}>
-            <Header></Header>
-            {/* <button
-              onClick={() => {
-                hide();
-              }}
-            ></button> */}
-            <Main
-              image={this.state.image}
-              handleImage={this.handleImage}
-              handleRipple={(val: boolean) => {
-                if (val) {
-                  show();
-                } else {
-                  hide();
-                }
-              }}
-            ></Main>
-            <Footer></Footer>
-          </div>
-        )}
-      </WaterWave>
+        <BrowserRouter>
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <Profile
+                  height={this.props.height}
+                  title="Hello, world-!"
+                  desc="React Web Mini Project"
+                  image={image}
+                  handleImage={this.handleImage}
+                />
+              }
+            />
+
+            <Route path="/main/*" element={<Main></Main>} />
+
+            <Route path="*" element={<Navigate replace to="/errorPage" />} />
+            <Route
+              path="/errorPage"
+              element={<NotFound height={this.props.height} image={image} />}
+            />
+          </Routes>
+        </BrowserRouter>
+      </div>
     );
   }
 }

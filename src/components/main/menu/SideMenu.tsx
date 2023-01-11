@@ -12,15 +12,16 @@ interface Menu {
   link: string;
 }
 
-const SideMenu = () => {
+const SideMenu = (props: { image: string; setImage: any }) => {
   const [hoverState, setHoverState] = useState(false);
   const [wheelState, setWheelState] = useState(0);
+  const [image, setImage] = useState(props.image);
 
   let menu: Menu[] = [
-    { name: "Post Malon", imageUrl: malonImage, link: "/postmalone" },
-    { name: "Rose", imageUrl: roseImage, link: "/rose" },
-    { name: "BTS", imageUrl: btsImage, link: "/bts" },
-    { name: "Chris", imageUrl: ChrisImage, link: "/chris" },
+    { name: "Post Malon", imageUrl: malonImage, link: "/main/postmalone" },
+    { name: "Rose", imageUrl: roseImage, link: "/main/rose" },
+    { name: "BTS", imageUrl: btsImage, link: "/main/bts" },
+    { name: "Chris", imageUrl: ChrisImage, link: "/main/chris" },
   ];
 
   function scrollRotate(e: any) {
@@ -49,7 +50,9 @@ const SideMenu = () => {
       className="each-side-menu"
       key={menu.name}
       id={"menu" + idx}
+      onClick={() => props.setImage(menu.imageUrl)}
     >
+      <div></div>
       <img src={menu.imageUrl} alt={menu.name}></img>
     </Link>
   ));
