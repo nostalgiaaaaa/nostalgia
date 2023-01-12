@@ -10,7 +10,16 @@ const LabelView = (props: Props) => {
 
   return (
     <div className="label-wrap">
-      <div className={`label ${props.play ? "play" : ""}`}>{label}</div>
+      <div
+        style={{
+          width: props.play
+            ? `${props.label.length * 8}%`
+            : `${props.label.length * 6}%`,
+        }}
+        className={`label ${props.play ? "play" : ""}`}
+      >
+        {label}
+      </div>
     </div>
   );
 };
