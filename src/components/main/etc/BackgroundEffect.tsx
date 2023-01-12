@@ -67,7 +67,7 @@ const BackgroundEffect = (props: Props) => {
           className="piece-conts"
           style={{
             backgroundImage: `url(${image})`,
-            backgroundSize: `${inWidth}px`,
+            backgroundSize: `auto ${inHeight}px`,
           }}
         ></div>
       </div>
@@ -79,7 +79,7 @@ const BackgroundEffect = (props: Props) => {
           className="piece-conts"
           style={{
             backgroundImage: `url(${image})`,
-            backgroundSize: `${inWidth}px`,
+            backgroundSize: `auto ${inHeight}px`,
             backgroundPosition: `-${inWidth * 0.4}px 0px`,
           }}
         ></div>
@@ -92,7 +92,7 @@ const BackgroundEffect = (props: Props) => {
           className="piece-conts"
           style={{
             backgroundImage: `url(${image})`,
-            backgroundSize: `${inWidth}px`,
+            backgroundSize: `auto ${inHeight}px`,
             backgroundPosition: `-${inWidth * 0.9}px 0px`,
           }}
         ></div>
@@ -105,7 +105,7 @@ const BackgroundEffect = (props: Props) => {
           className="piece-conts"
           style={{
             backgroundImage: `url(${image})`,
-            backgroundSize: `${inWidth}px`,
+            backgroundSize: `auto ${inHeight}px`,
             backgroundPosition: `-${inWidth * 0.3}px -${inHeight * 0.5}px`,
           }}
         ></div>
@@ -118,7 +118,7 @@ const BackgroundEffect = (props: Props) => {
           className="piece-conts"
           style={{
             backgroundImage: `url(${image})`,
-            backgroundSize: `${inWidth}px`,
+            backgroundSize: `auto ${inHeight}px`,
             backgroundPosition: `0px -${inHeight * 0.5}px`,
           }}
         ></div>
@@ -131,7 +131,7 @@ const BackgroundEffect = (props: Props) => {
           className="piece-conts"
           style={{
             backgroundImage: `url(${image})`,
-            backgroundSize: `${inWidth}px`,
+            backgroundSize: `auto ${inHeight}px`,
             backgroundPosition: `-${inWidth * 0.7}px -${inHeight * 0.15}px`,
           }}
         ></div>
@@ -144,7 +144,7 @@ const BackgroundEffect = (props: Props) => {
           className="piece-conts"
           style={{
             backgroundImage: `url(${image})`,
-            backgroundSize: `${inWidth}px`,
+            backgroundSize: `auto ${inHeight}px`,
             backgroundPosition: `-${inWidth * 0.4}px -${inHeight * 0.15}px`,
           }}
         ></div>
@@ -157,7 +157,7 @@ const BackgroundEffect = (props: Props) => {
           className="piece-conts"
           style={{
             backgroundImage: `url(${image})`,
-            backgroundSize: `${inWidth}px`,
+            backgroundSize: `auto ${inHeight}px`,
             backgroundPosition: `-${inWidth * 0.6}px -${inHeight * 0.5}px`,
           }}
         ></div>
@@ -170,7 +170,7 @@ const BackgroundEffect = (props: Props) => {
           className="piece-conts"
           style={{
             backgroundImage: `url(${image})`,
-            backgroundSize: `${inWidth}px`,
+            backgroundSize: `auto ${inHeight}px`,
             backgroundPosition: `-${inWidth * 0.3}px -${inHeight * 0.8}px`,
           }}
         ></div>
@@ -185,7 +185,7 @@ const BackgroundEffect = (props: Props) => {
           className="piece-conts"
           style={{
             backgroundImage: `url(${image})`,
-            backgroundSize: `${inWidth}px`,
+            backgroundSize: `auto ${inHeight}px`,
             backgroundPosition: `-${inWidth * 0.9}px -${inHeight * 0.7}px`,
           }}
         ></div>

@@ -14,7 +14,10 @@ import {
 const PostMalone = () => {
   const [videoState, setVideoState] = useState(false);
   const [isShowCanvas, setisShowCanvas] = useState(false);
-
+  let raf: number;
+  useEffect(() => {
+    window.cancelAnimationFrame(raf);
+  });
   useEffect(() => {
     let flag = 1;
     let width = 0;
@@ -22,7 +25,6 @@ const PostMalone = () => {
     let inWidth = 0;
     let inHeight = 0;
     let inVideoArray: string[][][] = [];
-    let raf: number;
     let video = document.getElementById("video") as HTMLVideoElement;
     let c1 = document.getElementById("c1") as HTMLCanvasElement;
     let ctx1 = c1.getContext("2d");
@@ -87,6 +89,15 @@ const PostMalone = () => {
           inVideoArray[2][i][k] = String.fromCharCode(B);
         }
       }
+      ctx1?.clearRect(0, 0, inWidth, inHeight);
+      ctx2?.clearRect(0, 0, inWidth, inHeight);
+      ctx3?.clearRect(0, 0, inWidth, inHeight);
+      ctx4?.clearRect(0, 0, inWidth, inHeight);
+      ctx5?.clearRect(0, 0, inWidth, inHeight);
+      ctx6?.clearRect(0, 0, inWidth, inHeight);
+      ctx7?.clearRect(0, 0, inWidth, inHeight);
+      ctx8?.clearRect(0, 0, inWidth, inHeight);
+
       let grayArr = grayscale(
         inHeight,
         inWidth,

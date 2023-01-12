@@ -14,7 +14,11 @@ import {
 const PostMalone = () => {
   const [videoState, setVideoState] = useState(false);
   const [isShowCanvas, setisShowCanvas] = useState(false);
+  let raf: number;
 
+  useEffect(() => {
+    window.cancelAnimationFrame(raf);
+  });
   useEffect(() => {
     let flag = 1;
     let width = 0;
@@ -22,7 +26,6 @@ const PostMalone = () => {
     let inWidth = 0;
     let inHeight = 0;
     let inVideoArray: string[][][] = [];
-    let raf: number;
     let video = document.getElementById("video") as HTMLVideoElement;
     let c1 = document.getElementById("c1") as HTMLCanvasElement;
     let ctx1 = c1.getContext("2d");
@@ -121,7 +124,7 @@ const PostMalone = () => {
   return (
     <>
       <BackgroundEffect play={videoState}></BackgroundEffect>
-      <LabelView play={videoState} label={"POSTMALONE"}></LabelView>
+      <LabelView play={videoState} label={"ROSÉ"}></LabelView>
       <div className="video">
         <video id="video" controls={true} width="480" height="270">
           <source
